@@ -24,7 +24,7 @@ const sendEmail = async (to, subject, text, html) => {
         to: to,
         subject: subject,
         text: text,
-        // html: body,
+        html: html,
       })
       .then((info) => {
         console.log("Message sent: %s", info.messageId);
@@ -34,7 +34,6 @@ const sendEmail = async (to, subject, text, html) => {
       .catch((error) => {
         console.log(error);
       });
-//   });
 };
 
 const sendRegisterEmail = async (userEmail, name) => {

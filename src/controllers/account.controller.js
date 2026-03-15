@@ -63,10 +63,10 @@ const getUserAccountBalance = async (req, res) => {
       },
     },
     ])
-
+    const currentBalance = balance.length ? balance[0].balance : 0;
     res.status(200).json({
       accountId: account._id,
-      balance: balance[0].balance,
+      balance: currentBalance,
     });
   } catch (error) {
     res.status(500).json(error.message);

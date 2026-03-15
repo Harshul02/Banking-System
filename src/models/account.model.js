@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const ledgerModel = require("./transaction.model");
 
 const accountSchema = new mongoose.Schema(
   {

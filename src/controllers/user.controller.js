@@ -56,14 +56,16 @@ const userLoginController = async (req, res) => {
     const { email, password } = req.body;
     const user = await userModel.findOne({ email }).select("+password");
     if (!user) {
-      res
+      return res
         .status(401)
         .json({ message: "User Not Found, Please Register", status: "failed" });
     }
     const isPasswordCorrect = await user.comparePassword(password);
 
     if (!isPasswordCorrect) {
-      res.status(401).json({ message: "Wrong Password", status: "failed" });
+      return res
+        .status(401)
+        .json({ message: "Wrong Password", status: "failed" });
     }
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "3d",
@@ -91,26 +93,38 @@ const userLoginController = async (req, res) => {
  * - User Logout Controller
  * - POST /api/auth/logout
  */
-const userLogoutController = async (req,res)=>{
-    try{
-    const token = req.cookies.token || req.headers["authorization"].split("Bearer ")[1];
+const userLogoutController = async (req, res) => {
+  try {
 
-    if(!token){
-        return res.status(400).json({
-            message: "User logged out successfully",
-        });
+    const authHeader = req.headers.authorization;
+    const token =
+      req.cookies?.token ||
+      (authHeader?.startsWith("Bearer ") ? authHeader.split(" ")[1] : null);
+
+    if (!token) {
+      return res.status(400).json({
+        message: "User logged out successfully",
+      });
     }
     await tokenBlackListModel.create({
-        token: token,
+      token: token,
     });
-    res.clearCookie("token", "");
+
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
     res.status(200).json({
-        message: "User logged out successfully",
+      message: "User logged out successfully",
     });
-}catch(error){
+  } catch (error) {
     res.status(500).json(error.message);
-}
+  }
+};
 
-}
-
-module.exports = { userRegisterController, userLoginController, userLogoutController };
+module.exports = {
+  userRegisterController,
+  userLoginController,
+  userLogoutController,
+};
